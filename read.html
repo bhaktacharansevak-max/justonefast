@@ -275,7 +275,7 @@ function renderBlock(b){
   }
   else if(b.t==='verse'){
     el=document.createElement('blockquote'); el.className='sloka';
-    b.lines.forEach(function(ln){ var sp=document.createElement('span'); sp.className='vl'; sp.textContent=ln; el.appendChild(sp); });
+    b.lines.forEach(function(ln){ var sp=document.createElement('span'); sp.className='vl snt'; sp.textContent=ln+' '; var rec={el:sp, text:ln}; sp.addEventListener('click', function(){ if(hasSel())return; playFrom(SENT.indexOf(rec)); }); el.appendChild(sp); SENT.push(rec); });
     if(b.cite){ var c=document.createElement('cite'); c.textContent=b.cite; el.appendChild(c); }
     contentEl.appendChild(el); return;
   }
