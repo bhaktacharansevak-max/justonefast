@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="One Fast Can Change Your Life — a free book on Ekadashi, the eleventh-day fast: one day given to God, a rest given to the body. Read it or hear it, free.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%232c376b'/><path d='M40 18 a16 16 0 1 0 0 28 a12.5 12.5 0 1 1 0 -28z' fill='%23E8CD7C'/></svg>">
+<title>One Fast Can Change Your Life — read &amp; listen, free</title>
+<meta name="theme-color" content="#2c376b">
+<style>
+  :root{
+    --green:#2c376b; --green-soft:#3b4a8a; --leaf:#c2922e;
+    --cream:#fbf7ee; --cream-2:#eef0f8; --panel:#fffdf8;
+    --ink:#20242e; --muted:#5d6376; --rule:#e3e1d2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--cream); color:var(--ink);
+    font-family:"Palatino Linotype","Book Antiqua",Palatino,Garamond,Georgia,serif; line-height:1.65}
+  .topbar{display:flex; align-items:center; gap:12px; padding:11px 18px; background:var(--green); color:#fff}
+  .topbar .lf{font-size:22px}
+  .topbar .nm{font-size:16px; font-weight:700; letter-spacing:.02em}
+  .topbar .free{margin-left:auto; font-size:12px; opacity:.95; background:rgba(255,255,255,.16); padding:4px 11px; border-radius:20px}
+  .wrap{max-width:760px; margin:0 auto; padding:34px 24px 120px}
+  .hero{text-align:center}
+  .hero img.cover{width:230px; max-width:62%; border-radius:12px; box-shadow:0 16px 40px rgba(0,0,0,.22); margin:6px auto 22px}
+  h1{color:var(--green); font-size:33px; line-height:1.16; margin:.1em 0 .15em}
+  .subt{color:var(--green-soft); font-size:17px; font-style:italic; margin:0 auto 22px; max-width:30em}
+  .intro{font-size:18.5px; max-width:34em; margin:0 auto}
+  .intro p{margin:.8em 0}
+  .cta{display:inline-flex; align-items:center; gap:10px; margin:26px 0 8px; background:var(--green); color:#fff;
+    font-family:inherit; font-size:20px; font-weight:700; text-decoration:none; padding:15px 30px; border-radius:14px;
+    box-shadow:0 10px 26px rgba(44,55,107,.30); transition:.14s}
+  .cta:hover{background:var(--green-soft); transform:translateY(-1px)}
+  .cta .ar{font-size:22px}
+  .note{font-size:13.5px; color:var(--muted); margin:0}
+  .pills{display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:34px auto 0; max-width:34em}
+  .pill{background:var(--panel); border:1px solid var(--rule); border-radius:22px; padding:8px 16px; font-size:14.5px; color:var(--green)}
+  .quote{margin:36px auto 0; max-width:30em; text-align:center; font-style:italic; color:var(--ink);
+    background:var(--cream-2); border:1px solid var(--rule); border-left:4px solid var(--leaf); border-radius:10px; padding:16px 20px; font-size:16.5px}
+  .foot{margin:46px auto 0; text-align:center; color:var(--muted); font-size:13.5px; line-height:1.6; border-top:1px solid var(--rule); padding-top:20px}
+  .fab{position:fixed; right:18px; bottom:18px; z-index:40; background:var(--leaf); color:#3a2c08; border:none;
+    font-family:inherit; font-size:15.5px; font-weight:700; padding:13px 20px; border-radius:30px; cursor:pointer;
+    box-shadow:0 8px 22px rgba(44,55,107,.34); display:flex; align-items:center; gap:8px}
+  .fab:hover{background:#d8a73e}
+  .fab .fl{font-size:17px}
+  .overlay{position:fixed; inset:0; z-index:50; background:rgba(20,22,34,.55); display:none; align-items:center; justify-content:center; padding:18px}
+  .overlay.on{display:flex}
+  .card{background:var(--panel); border-radius:16px; max-width:420px; width:100%; padding:24px 24px 22px; box-shadow:0 24px 60px rgba(0,0,0,.3); position:relative}
+  .card h2{color:var(--green); font-size:22px; margin:0 0 6px}
+  .card p.lead{color:var(--muted); font-size:15px; margin:0 0 16px; line-height:1.55}
+  .card label{display:block; font-size:13px; color:var(--green); font-weight:700; margin:12px 0 5px}
+  .card input{width:100%; font-family:inherit; font-size:16px; padding:11px 13px; border:1px solid var(--rule); border-radius:10px; background:#fff; color:var(--ink)}
+  .card input:focus{outline:none; border-color:var(--leaf)}
+  .card .send{width:100%; margin-top:18px; background:var(--green); color:#fff; border:none; font-family:inherit; font-size:17px; font-weight:700; padding:13px; border-radius:12px; cursor:pointer}
+  .card .send:hover{background:var(--green-soft)}
+  .card .send[disabled]{opacity:.6; cursor:default}
+  .card .x{position:absolute; top:12px; right:14px; background:none; border:none; font-size:22px; color:var(--muted); cursor:pointer; line-height:1}
+  .card .msg{font-size:14px; margin-top:12px; min-height:1.2em; text-align:center}
+  .card .msg.ok{color:var(--green)}
+  .card .msg.err{color:#a3331f}
+  .card .privacy{font-size:12px; color:var(--muted); text-align:center; margin-top:12px}
+  @media (max-width:600px){ h1{font-size:27px} .intro{font-size:17px} .cta{font-size:18px; padding:14px 24px} }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="lf">&#9790;</span>
+    <span class="nm">One Fast Can Change Your Life</span>
+    <span class="free">Free to read &amp; share</span>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <img class="cover" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 120'><rect width='80' height='120' fill='%23272c6b'/><rect x='2.5' y='2.5' width='75' height='115' fill='none' stroke='%23C6A249' stroke-width='1.4'/><path d='M52 28 a17 17 0 1 0 0 30 a13.5 13.5 0 1 1 0 -30z' fill='%23E8CD7C'/><circle cx='28' cy='30' r='1.6' fill='%23E8CD7C'/><circle cx='26' cy='52' r='1.2' fill='%23E8CD7C'/><text x='40' y='86' fill='%23F4F6FC' font-family='Georgia,serif' font-size='10' font-weight='700' text-anchor='middle'>ONE</text><text x='40' y='98' fill='%23E8CD7C' font-family='Georgia,serif' font-size='9.5' font-weight='700' text-anchor='middle'>FAST</text><text x='40' y='109' fill='%23aab4dd' font-family='Georgia,serif' font-size='7' font-style='italic' text-anchor='middle'>Ekadashi</text></svg>" alt="One Fast Can Change Your Life — book cover">
+      <h1>One Fast Can Change Your Life</h1>
+      <p class="subt">The one day to reset your life — one day given to God, a rest given to the body.</p>
+
+      <div class="intro">
+        <p>There is one day, kept even once, that can quietly reset a life: the eleventh day of the moon, when you set the plate down, lighten the body, and turn the heart toward God.</p>
+        <p>The oldest scriptures call it the king of all vows. It rests and renews the body, quiets the restless senses, lifts the weight of old karma, and opens a real, two-way line to the Divine.</p>
+        <p>It asks no temple, no fee, no change of faith — not even a perfect attempt, to begin. Keep your own God. Just give one day. Written never to be sold, only to be given. Read it, or simply listen.</p>
+      </div>
+
+      <div>
+        <a class="cta" href="read.html">Read or Listen <span class="ar">&#8594;</span></a>
+      </div>
+      <p class="note">Free &middot; no sign-up needed &middot; reads aloud, sentence by sentence</p>
+
+      <div class="pills">
+        <span class="pill">Rest the body</span>
+        <span class="pill">Quiet the senses</span>
+        <span class="pill">Lift old karma</span>
+        <span class="pill">Draw near to God</span>
+      </div>
+
+      <div class="quote">It has answered even the one who swore he could not fast at all. Then what of you, who are reaching for it on purpose?</div>
+
+      <div class="foot">
+        One Fast Can Change Your Life &middot; freely given, in a spirit of devotion.<br>
+        Read it, hear it, and keep a day for God.
+      </div>
+    </div>
+  </div>
+
+  <button class="fab" id="fab"><span class="fl">&#9790;</span> Stay in touch</button>
+
+  <div class="overlay" id="overlay">
+    <div class="card">
+      <button class="x" id="closeBtn" aria-label="Close">&times;</button>
+      <h2>Keep a day for God with us</h2>
+      <p class="lead">Leave your name and email to become an Ekadashi Sevak — for gentle reminders of the fast days and simple ways to take part. No spam, ever.</p>
+      <form id="joinForm">
+        <label for="jn">Your name</label>
+        <input id="jn" type="text" autocomplete="name" placeholder="Name">
+        <label for="je">Your email</label>
+        <input id="je" type="email" autocomplete="email" placeholder="you@example.com" required>
+        <button class="send" id="sendBtn" type="submit">Keep me posted</button>
+        <div class="msg" id="formMsg"></div>
+        <div class="privacy">We'll only write to share fast-day reminders and seva — never sold or shared.</div>
+      </form>
+    </div>
+  </div>
+
+<script>
+/* Paste the Ekadashi Sevaks Google Apps Script /exec URL between the quotes after deploying, then re-publish. */
+var SCRIPT_URL = "";
+
+var overlay=document.getElementById('overlay');
+function openForm(){ overlay.classList.add('on'); setTimeout(function(){var e=document.getElementById('jn'); if(e) e.focus();},50); }
+function closeForm(){ overlay.classList.remove('on'); }
+document.getElementById('fab').onclick=openForm;
+document.getElementById('closeBtn').onclick=closeForm;
+overlay.addEventListener('click', function(e){ if(e.target===overlay) closeForm(); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeForm(); });
+
+var msgEl=document.getElementById('formMsg'), sendBtn=document.getElementById('sendBtn');
+function msg(t, cls){ msgEl.textContent=t; msgEl.className='msg'+(cls?(' '+cls):''); }
+
+document.getElementById('joinForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var name=document.getElementById('jn').value.trim();
+  var email=document.getElementById('je').value.trim();
+  if(!email || email.indexOf('@')<1){ msg('Please enter a valid email.', 'err'); return; }
+  if(!SCRIPT_URL){ msg("We're just finishing setup — please check back very soon.", 'ok'); return; }
+  sendBtn.disabled=true; msg('Sending…');
+  fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({name:name, email:email, source:'onefast-home'})})
+   .then(function(r){ return r.json(); })
+   .then(function(){ thanks(); })
+   .catch(function(){ thanks(); });
+});
+function thanks(){
+  document.querySelector('.card h2').textContent='Thank you';
+  document.querySelector('.card .lead').textContent="We're glad you're here. We'll be in touch gently, with fast-day reminders and ways to take part.";
+  document.getElementById('joinForm').style.display='none';
+  setTimeout(closeForm, 2600);
+}
+</script>
+</body>
+</html>
