@@ -83,7 +83,7 @@
       </div>
 
       <div>
-        <a class="cta" href="read.html">Read or Listen <span class="ar">&#8594;</span></a>
+        <a class="cta" id="ctaRead" href="read.html">Read or Listen <span class="ar">&#8594;</span></a>
       </div>
       <p class="note">Free &middot; no sign-up needed &middot; reads aloud, sentence by sentence</p>
 
@@ -94,7 +94,7 @@
         <span class="pill">Draw near to God</span>
       </div>
 
-      <p style="margin:30px auto 0; max-width:33em; font-size:15px; color:var(--muted)">&#128241; Keeping the fast? <a href="app.html" style="color:var(--green); font-weight:700; text-decoration:none; border-bottom:1px solid var(--leaf)">Get the free companion app</a> &mdash; a live countdown to each Ekadashi, gentle reminders, and the whole book in your pocket.</p>
+      <p style="margin:30px auto 0; max-width:33em; font-size:15px; color:var(--muted)">&#128241; Keeping the fast? <a href="app.html" style="color:var(--green); font-weight:700; text-decoration:none; border-bottom:1px solid var(--leaf)">Get the free Ekadashi app</a> &mdash; a live countdown to each Ekadashi, gentle reminders, and the whole book in your pocket.</p>
 
       <div class="quote">It has answered even the one who swore he could not fast at all. Then what of you, who are reaching for it on purpose?</div>
 
@@ -111,7 +111,7 @@
     <div class="card">
       <button class="x" id="closeBtn" aria-label="Close">&times;</button>
       <h2>Get your free Sevak <span style="color:var(--muted);font-weight:400">(Volunteer)</span> login</h2>
-      <p class="lead">Read and hear the whole book — and download the companion app — free. Your login keeps your place, your notes, and your questions, all in one place.</p>
+      <p class="lead">Read and hear the whole book — and download the Ekadashi app — free. Your login keeps your place, your notes, and your questions, all in one place.</p>
       <form id="joinForm">
         <label for="jn">What shall we call you?</label>
         <input id="jn" type="text" autocomplete="name" placeholder="Your name">
@@ -130,15 +130,22 @@
 /* Paste the Ekadashi Sevaks Google Apps Script /exec URL between the quotes after deploying, then re-publish. */
 var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwou749sCStHL5ASKbdY2w_8iFVqLMlwnRzbETVEN_BQJ8OosAA6sUBy0-la73bCyCU4w/exec";
 
-var overlay=document.getElementById('overlay');
-function openForm(){ overlay.classList.add('on'); setTimeout(function(){var e=document.getElementById('jn'); if(e) e.focus();},50); }
+var overlay=document.getElementById('overlay'); var gateThen=null;
+function openForm(then){ gateThen=then||null; overlay.classList.add('on'); setTimeout(function(){var e=document.getElementById('jn'); if(e) e.focus();},50); }
 function closeForm(){ overlay.classList.remove('on'); }
-document.getElementById('fab').onclick=openForm;
+document.getElementById('fab').onclick=function(){ openForm(); };
 document.getElementById('closeBtn').onclick=closeForm;
 overlay.addEventListener('click', function(e){ if(e.target===overlay) closeForm(); });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeForm(); });
 var laterBtn=document.getElementById('laterBtn');
-if(laterBtn) laterBtn.onclick=function(e){ e.preventDefault(); closeForm(); };
+if(laterBtn) laterBtn.onclick=function(e){ e.preventDefault(); if(gateThen){ var d=gateThen; gateThen=null; location.href=d; } else { closeForm(); } };
+
+/* Read or Listen: invite non-members first, but let them through to the free chapters if they skip */
+var ctaRead=document.getElementById('ctaRead');
+if(ctaRead) ctaRead.addEventListener('click', function(e){
+  if(localStorage.getItem('ofr_sevak')) return;
+  e.preventDefault(); openForm('read.html');
+});
 
 /* Greet every new visitor with the Sevak login (once per session; never if already joined) */
 (function(){
@@ -147,7 +154,7 @@ if(laterBtn) laterBtn.onclick=function(e){ e.preventDefault(); closeForm(); };
     if(sessionStorage.getItem('ofr_popup_shown')) return;
     sessionStorage.setItem('ofr_popup_shown','1');
   }catch(_){ }
-  setTimeout(openForm, 1200);
+  setTimeout(function(){ openForm(); }, 4000);
 })();
 
 var msgEl=document.getElementById('formMsg'), sendBtn=document.getElementById('sendBtn');
@@ -170,7 +177,12 @@ document.getElementById('joinForm').addEventListener('submit', function(e){
 });
 function thanks(){
   document.querySelector('.card h2').textContent='Welcome, Sevak 🙏';
-  document.querySelector('.card .lead').innerHTML="Your login is ready. The whole book is open to you — and the companion app is yours to download.<br><br><a href=\"read.html\" style=\"color:var(--green);font-weight:700;text-decoration:none\">Read or listen &#8594;</a> &nbsp;&middot;&nbsp; <a href=\"app.html\" style=\"color:var(--green);font-weight:700;text-decoration:none\">Get the app &#8594;</a>";
+  if(gateThen){
+    document.querySelector('.card .lead').textContent='Your login is ready. Opening the book for you…';
+    document.getElementById('joinForm').style.display='none';
+    var d=gateThen; gateThen=null; setTimeout(function(){ location.href=d; }, 1400); return;
+  }
+  document.querySelector('.card .lead').innerHTML="Your login is ready. The whole book is open to you — and the Ekadashi app is yours to download.<br><br><a href=\"read.html\" style=\"color:var(--green);font-weight:700;text-decoration:none\">Read or listen &#8594;</a> &nbsp;&middot;&nbsp; <a href=\"app.html\" style=\"color:var(--green);font-weight:700;text-decoration:none\">Get the app &#8594;</a>";
   document.getElementById('joinForm').style.display='none';
   setTimeout(closeForm, 5200);
 }
