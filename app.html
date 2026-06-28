@@ -110,7 +110,7 @@
     </div>
 
     <div class="sec">
-      <h2><span class="ic">&#129760;</span> Become an Ekadashi Sevak</h2>
+      <h2><span class="ic">&#129760;</span> Become an Ekadashi Sevak (Volunteer)</h2>
       <div class="card">
         <p>Leave your name for gentle reminders of the coming fast days, and simple ways to take part. No cost, no spam — only seva.</p>
         <form class="join" id="joinForm">
@@ -277,6 +277,7 @@ document.getElementById('joinForm').addEventListener('submit', function(ev){
   var mobile=document.getElementById('jm').value.trim();
   var msg=document.getElementById('joinMsg'), btn=document.getElementById('sendBtn');
   if(!email || email.indexOf('@')<1){ msg.textContent='Please enter a valid email.'; return; }
+  try{ localStorage.setItem('ofr_sevak','1'); localStorage.setItem('ofr_sevak_name',name); localStorage.setItem('ofr_sevak_email',email); }catch(_){ }
   btn.disabled=true; msg.textContent='Sending…';
   fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
     body: JSON.stringify({name:name, email:email, mobile:mobile, source:'onefast-app'})})
