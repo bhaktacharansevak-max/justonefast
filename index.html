@@ -110,80 +110,130 @@
   <div class="overlay" id="overlay">
     <div class="card">
       <button class="x" id="closeBtn" aria-label="Close">&times;</button>
-      <h2>Get your free Sevak <span style="color:var(--muted);font-weight:400">(Volunteer)</span> login</h2>
-      <p class="lead">Read and hear the whole book — and download the Ekadashi app — free. Your login keeps your place, your notes, and your questions, all in one place.</p>
-      <form id="joinForm">
-        <label for="jn">What shall we call you?</label>
-        <input id="jn" type="text" autocomplete="name" placeholder="Your name">
-        <label for="je">Email <span style="font-weight:400;color:var(--muted)">(your login)</span></label>
-        <input id="je" type="email" autocomplete="email" placeholder="you@example.com" required>
-        <label for="jm">Mobile <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
-        <input id="jm" type="tel" autocomplete="tel" placeholder="Mobile number">
-        <button class="send" id="sendBtn" type="submit">Create my Sevak login &amp; continue</button>
-        <div class="msg" id="formMsg"></div>
+
+      <div id="vDetails">
+        <h2 id="dTitle">Get your free Sevak <span style="color:var(--muted);font-weight:400">(Volunteer)</span> login</h2>
+        <p class="lead" id="dLead">Read and hear the whole book — and download the Ekadashi app — free. Your login keeps your place, your notes, and your questions, all in one place.</p>
+        <form id="joinForm">
+          <div id="nameWrap">
+            <label for="jn">What shall we call you?</label>
+            <input id="jn" type="text" autocomplete="name" placeholder="Your name">
+          </div>
+          <label for="je">Email <span style="font-weight:400;color:var(--muted)">(your login)</span></label>
+          <input id="je" type="email" autocomplete="email" placeholder="you@example.com" required>
+          <div id="mobWrap">
+            <label for="jm">Mobile <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+            <input id="jm" type="tel" autocomplete="tel" placeholder="Mobile number">
+          </div>
+          <button class="send" id="sendBtn" type="submit">Create my Sevak login &amp; continue</button>
+          <div class="msg" id="formMsg"></div>
+        </form>
+        <button type="button" id="altBtn" style="width:100%;margin-top:10px;background:transparent;color:var(--green);border:1px solid var(--rule);font-family:inherit;font-size:15px;font-weight:700;padding:11px;border-radius:11px;cursor:pointer">Sevak login</button>
+        <div id="altNote" style="text-align:center;font-size:12.5px;color:var(--muted);margin-top:7px">Already a volunteer? Log in with your email.</div>
         <div class="privacy"><a href="#" id="laterBtn" style="color:var(--muted)">Maybe later</a> &nbsp;&middot;&nbsp; Free, always — you're joining the seva</div>
-      </form>
+      </div>
+
+      <div id="vCode" style="display:none">
+        <h2>Enter your code</h2>
+        <p class="lead">We've emailed a 6-digit code to <b id="cEmail"></b>. Pop it in below to open your Sevak space.</p>
+        <form id="codeForm">
+          <label for="jc">6-digit code</label>
+          <input id="jc" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" style="letter-spacing:.3em;font-size:20px;text-align:center">
+          <button class="send" id="verifyBtn" type="submit">Verify &amp; continue</button>
+          <div class="msg" id="codeMsg"></div>
+        </form>
+        <div class="privacy"><a href="#" id="resendBtn" style="color:var(--muted)">Resend code</a> &nbsp;&middot;&nbsp; <a href="#" id="changeEmail" style="color:var(--muted)">Change email</a> &nbsp;&middot;&nbsp; <a href="#" id="skipCode" style="color:var(--muted)">Trouble? Continue anyway</a></div>
+      </div>
     </div>
   </div>
 
+<script src="of-auth.js"></script>
 <script>
-/* Paste the Ekadashi Sevaks Google Apps Script /exec URL between the quotes after deploying, then re-publish. */
-var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwou749sCStHL5ASKbdY2w_8iFVqLMlwnRzbETVEN_BQJ8OosAA6sUBy0-la73bCyCU4w/exec";
-
-var overlay=document.getElementById('overlay'); var gateThen=null;
-function openForm(then){ gateThen=then||null; overlay.classList.add('on'); setTimeout(function(){var e=document.getElementById('jn'); if(e) e.focus();},50); }
+var overlay=document.getElementById('overlay'); var gateThen=null; var mode='register'; var pendEmail='', pendName='', pendMobile='';
+function $(id){ return document.getElementById(id); }
+function openForm(then){ gateThen=then||null; showDetails('register'); overlay.classList.add('on'); setTimeout(function(){ var e=$('je'); if(e) e.focus(); },60); }
 function closeForm(){ overlay.classList.remove('on'); }
-document.getElementById('fab').onclick=function(){ openForm(); };
-document.getElementById('closeBtn').onclick=closeForm;
+$('fab').onclick=function(){ openForm(); };
+$('closeBtn').onclick=closeForm;
 overlay.addEventListener('click', function(e){ if(e.target===overlay) closeForm(); });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeForm(); });
-var laterBtn=document.getElementById('laterBtn');
-if(laterBtn) laterBtn.onclick=function(e){ e.preventDefault(); if(gateThen){ var d=gateThen; gateThen=null; location.href=d; } else { closeForm(); } };
+$('laterBtn').onclick=function(e){ e.preventDefault(); if(gateThen){ var d=gateThen; gateThen=null; location.href=d; } else { closeForm(); } };
+
+var TITLE_REG='Get your free Sevak <span style="color:var(--muted);font-weight:400">(Volunteer)</span> login';
+var TITLE_LOG='Sevak <span style="color:var(--muted);font-weight:400">(Volunteer)</span> login';
+var LEAD_REG="Read and hear the whole book — and download the Ekadashi app — free. Your login keeps your place, your notes, and your questions, all in one place.";
+var LEAD_LOG="Welcome back. Enter your email and we'll send you a one-time code — your notes and questions will be just as you left them.";
+function showDetails(m){
+  mode=m; var reg=(m==='register');
+  $('vDetails').style.display=''; $('vCode').style.display='none';
+  $('joinForm').style.display=''; $('altBtn').style.display=''; $('altNote').style.display='';
+  $('nameWrap').style.display=reg?'':'none'; $('mobWrap').style.display=reg?'':'none';
+  $('dTitle').innerHTML=reg?TITLE_REG:TITLE_LOG;
+  $('dLead').textContent=reg?LEAD_REG:LEAD_LOG;
+  $('sendBtn').innerHTML=reg?'Create my Sevak login &amp; continue':'Email me a login code';
+  $('altBtn').textContent=reg?'Sevak login':'Create a Sevak login';
+  $('altNote').textContent=reg?'Already a volunteer? Log in with your email.':'New here? It only takes a moment.';
+  $('formMsg').textContent='';
+}
+$('altBtn').onclick=function(){ showDetails(mode==='register'?'login':'register'); var e=$('je'); if(e) e.focus(); };
+
+function showCode(email){
+  pendEmail=email; $('vDetails').style.display='none'; $('vCode').style.display='';
+  $('cEmail').textContent=email; $('codeMsg').textContent=''; $('jc').value='';
+  setTimeout(function(){ var e=$('jc'); if(e) e.focus(); },60);
+}
+function cap(s){ s=String(s||''); return s.charAt(0).toUpperCase()+s.slice(1); }
+
+$('joinForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var email=$('je').value.trim();
+  if(!email || email.indexOf('@')<1){ $('formMsg').textContent='Please enter a valid email.'; return; }
+  pendName = $('jn') ? $('jn').value.trim() : '';
+  pendMobile = $('jm') ? $('jm').value.trim() : '';
+  var btn=$('sendBtn'); btn.disabled=true; $('formMsg').textContent='Sending your code…';
+  OF.requestCode(email, pendName, pendMobile, mode==='login'?'onefast-home-login':'onefast-home')
+    .then(function(){ btn.disabled=false; showCode(email); })
+    .catch(function(){ btn.disabled=false; showCode(email); });
+});
+
+$('codeForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var code=$('jc').value.trim();
+  if(code.length<4){ $('codeMsg').textContent='Enter the 6-digit code.'; return; }
+  var btn=$('verifyBtn'); btn.disabled=true; $('codeMsg').textContent='Checking…';
+  OF.verifyCode(pendEmail, code).then(function(res){
+    btn.disabled=false;
+    if(res && res.ok){ thanks(); }
+    else { $('codeMsg').textContent = (res && res.error) ? cap(res.error) : 'That code did not work — try again.'; }
+  }).catch(function(){ btn.disabled=false; $('codeMsg').textContent='Network hiccup — try again, or continue anyway.'; });
+});
+$('resendBtn').onclick=function(e){ e.preventDefault(); OF.requestCode(pendEmail, pendName, pendMobile, 'onefast-home'); $('codeMsg').textContent='Code re-sent. Check your inbox (and spam).'; };
+$('changeEmail').onclick=function(e){ e.preventDefault(); showDetails(mode); };
+$('skipCode').onclick=function(e){ e.preventDefault(); OF.unlockLocal(pendEmail, pendName); thanks(); };
 
 /* Read or Listen: invite non-members first, but let them through to the free chapters if they skip */
-var ctaRead=document.getElementById('ctaRead');
-if(ctaRead) ctaRead.addEventListener('click', function(e){
-  if(localStorage.getItem('ofr_sevak')) return;
-  e.preventDefault(); openForm('read.html');
-});
+var ctaRead=$('ctaRead');
+if(ctaRead) ctaRead.addEventListener('click', function(e){ if(OF.isLoggedIn()) return; e.preventDefault(); openForm('read.html'); });
 
 /* Greet every new visitor with the Sevak login (once per session; never if already joined) */
 (function(){
   try{
-    if(localStorage.getItem('ofr_sevak')) return;
+    if(OF.isLoggedIn()) return;
     if(sessionStorage.getItem('ofr_popup_shown')) return;
     sessionStorage.setItem('ofr_popup_shown','1');
   }catch(_){ }
-  setTimeout(function(){ openForm(); }, 4000);
+  setTimeout(function(){ if(!OF.isLoggedIn()) openForm(); }, 4000);
 })();
 
-var msgEl=document.getElementById('formMsg'), sendBtn=document.getElementById('sendBtn');
-function msg(t, cls){ msgEl.textContent=t; msgEl.className='msg'+(cls?(' '+cls):''); }
-
-document.getElementById('joinForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  var name=document.getElementById('jn').value.trim();
-  var email=document.getElementById('je').value.trim();
-  var mobile=document.getElementById('jm').value.trim();
-  if(!email || email.indexOf('@')<1){ msg('Please enter a valid email.', 'err'); return; }
-  if(!SCRIPT_URL){ msg("We're just finishing setup — please check back very soon.", 'ok'); return; }
-  try{ localStorage.setItem('ofr_sevak','1'); localStorage.setItem('ofr_sevak_name',name); localStorage.setItem('ofr_sevak_email',email); }catch(_){ }
-  sendBtn.disabled=true; msg('Sending…');
-  fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify({name:name, email:email, mobile:mobile, source:'onefast-home'})})
-   .then(function(r){ return r.json(); })
-   .then(function(){ thanks(); })
-   .catch(function(){ thanks(); });
-});
 function thanks(){
-  document.querySelector('.card h2').textContent='Welcome, Sevak 🙏';
+  $('vCode').style.display='none'; $('vDetails').style.display='';
+  $('joinForm').style.display='none'; $('altBtn').style.display='none'; $('altNote').style.display='none';
+  $('dTitle').textContent='Welcome, Sevak 🙏';
   if(gateThen){
-    document.querySelector('.card .lead').textContent='Your login is ready. Opening the book for you…';
-    document.getElementById('joinForm').style.display='none';
+    $('dLead').textContent='Your login is ready. Opening the book for you…';
     var d=gateThen; gateThen=null; setTimeout(function(){ location.href=d; }, 1400); return;
   }
-  document.querySelector('.card .lead').innerHTML="Your login is ready. The whole book is open to you — and the Ekadashi app is yours to download.<br><br><a href=\"read.html\" style=\"color:var(--green);font-weight:700;text-decoration:none\">Read or listen &#8594;</a> &nbsp;&middot;&nbsp; <a href=\"app.html\" style=\"color:var(--green);font-weight:700;text-decoration:none\">Get the app &#8594;</a>";
-  document.getElementById('joinForm').style.display='none';
+  $('dLead').innerHTML="Your login is ready. The whole book is open to you — and the Ekadashi app is yours to download.<br><br><a href=\"read.html\" style=\"color:var(--green);font-weight:700;text-decoration:none\">Read or listen &#8594;</a> &nbsp;&middot;&nbsp; <a href=\"app.html\" style=\"color:var(--green);font-weight:700;text-decoration:none\">Get the app &#8594;</a>";
   setTimeout(closeForm, 5200);
 }
 </script>
