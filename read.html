@@ -507,7 +507,7 @@ openChapter(startAt, true);
   };
   function showGate(ci){ pendingCi=ci; gShowDetails('register'); gate.classList.add('on'); setTimeout(function(){ var e=document.getElementById('ofGe'); if(e) e.focus(); },60); }
   function hideGate(){ gate.classList.remove('on'); }
-  function proceed(){ hideGate(); var ci=(pendingCi==null?FREE:pendingCi); pendingCi=null; realOpen(ci); decorateTOC(); paintBook(); }
+  function proceed(){ hideGate(); var ci=(pendingCi==null?FREE:pendingCi); pendingCi=null; realOpen(ci); decorateTOC(); paintBook(); mountMenu(); }
 
   var gate=document.createElement('div'); gate.id='ofGate';
   gate.innerHTML='<div class="card">'+
@@ -528,7 +528,7 @@ openChapter(startAt, true);
     '</div>'+
     '<div id="ofGv2" style="display:none">'+
       '<h2>Enter your code</h2>'+
-      '<p class="sub">We’ve emailed a 6-digit code to <b id="ofGcEmail"></b>. Enter it to open your Sevak space.</p>'+
+      '<p class="sub" id="ofGcLead">We’ve emailed a 6-digit code to <b id="ofGcEmail"></b>. Enter it to open your Sevak space.</p>'+
       '<form id="ofGcodeForm">'+
         '<label>6-digit code</label><input id="ofGc" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" style="letter-spacing:.3em;text-align:center;font-size:20px">'+
         '<button class="go" type="submit" id="ofGverify">Verify &amp; continue</button>'+
@@ -557,10 +557,13 @@ openChapter(startAt, true);
     document.getElementById('ofGalt').onclick=function(){ gShowDetails(reg?'login':'register'); };
     document.getElementById('ofGmsg').textContent='';
   }
-  function gShowCode(email){
+  function gShowCode(email, registered){
     gpendEmail=email;
     document.getElementById('ofGv1').style.display='none'; document.getElementById('ofGv2').style.display='';
-    document.getElementById('ofGcEmail').textContent=email; document.getElementById('ofGcmsg').textContent=''; document.getElementById('ofGc').value='';
+    document.getElementById('ofGcLead').innerHTML = registered
+      ? 'Good news — you’re already registered with us. Your code is on its way to <b>'+email+'</b>.'
+      : 'We’ve emailed a 6-digit code to <b>'+email+'</b>. Enter it to open your Sevak space.';
+    document.getElementById('ofGcmsg').textContent=''; document.getElementById('ofGc').value='';
     setTimeout(function(){ var e=document.getElementById('ofGc'); if(e) e.focus(); },60);
   }
   document.getElementById('ofGback').onclick=function(){ hideGate(); realOpen(FREE-1); };
@@ -572,7 +575,7 @@ openChapter(startAt, true);
     gpendMobile=document.getElementById('ofGm')?document.getElementById('ofGm').value.trim():'';
     var b=document.getElementById('ofGsend'); b.disabled=true; document.getElementById('ofGmsg').textContent='Sending your code…';
     gReq(e, gpendName, gpendMobile, gmode==='login'?'onefast-reader-login':'onefast-reader')
-      .then(function(){ b.disabled=false; gShowCode(e); }).catch(function(){ b.disabled=false; gShowCode(e); });
+      .then(function(res){ b.disabled=false; gShowCode(e, res && res.registered); }).catch(function(){ b.disabled=false; gShowCode(e, false); });
   });
   document.getElementById('ofGcodeForm').addEventListener('submit', function(ev){
     ev.preventDefault();
@@ -714,6 +717,8 @@ openChapter(startAt, true);
   var lastCh=curCh;
   setInterval(function(){ if(curCh!==lastCh){ if(noteP.classList.contains('on')){ saveNoteNow(); loadNote(); } lastCh=curCh; paintAllChBars(); } }, 700);
   window.addEventListener('beforeunload', saveNoteNow);
+  function mountMenu(){ try{ if(window.OF && OF.isLoggedIn()){ var fb=document.querySelector('.topbar .free'); if(fb) fb.style.display='none'; OF.mountUserMenu({into:'.topbar', items:[{act:'notes',label:'📝 My notes'},{act:'questions',label:'❓ My questions'}], onItem:function(act){ if(act==='notes') openNotes(); else if(act==='questions') openQ(); }}); } }catch(_){ } }
+  mountMenu();
   if(curCh>=FREE && !isSevak()){ showGate(curCh); }
 })();
 </script>
