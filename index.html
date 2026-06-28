@@ -135,7 +135,7 @@
 
       <div id="vCode" style="display:none">
         <h2>Enter your code</h2>
-        <p class="lead">We've emailed a 6-digit code to <b id="cEmail"></b>. Pop it in below to open your Sevak space.</p>
+        <p class="lead" id="cLead">We've emailed a 6-digit code to <b id="cEmail"></b>. Pop it in below to open your Sevak space.</p>
         <form id="codeForm">
           <label for="jc">6-digit code</label>
           <input id="jc" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" style="letter-spacing:.3em;font-size:20px;text-align:center">
@@ -177,9 +177,12 @@ function showDetails(m){
 }
 $('altBtn').onclick=function(){ showDetails(mode==='register'?'login':'register'); var e=$('je'); if(e) e.focus(); };
 
-function showCode(email){
+function showCode(email, registered){
   pendEmail=email; $('vDetails').style.display='none'; $('vCode').style.display='';
-  $('cEmail').textContent=email; $('codeMsg').textContent=''; $('jc').value='';
+  $('cLead').innerHTML = registered
+    ? 'Good news — you’re already registered with us. Your code is on its way to <b>'+email+'</b>.'
+    : 'We’ve emailed a 6-digit code to <b>'+email+'</b>. Pop it in below to open your Sevak space.';
+  $('codeMsg').textContent=''; $('jc').value='';
   setTimeout(function(){ var e=$('jc'); if(e) e.focus(); },60);
 }
 function cap(s){ s=String(s||''); return s.charAt(0).toUpperCase()+s.slice(1); }
@@ -192,8 +195,8 @@ $('joinForm').addEventListener('submit', function(e){
   pendMobile = $('jm') ? $('jm').value.trim() : '';
   var btn=$('sendBtn'); btn.disabled=true; $('formMsg').textContent='Sending your code…';
   OF.requestCode(email, pendName, pendMobile, mode==='login'?'onefast-home-login':'onefast-home')
-    .then(function(){ btn.disabled=false; showCode(email); })
-    .catch(function(){ btn.disabled=false; showCode(email); });
+    .then(function(res){ btn.disabled=false; showCode(email, res && res.registered); })
+    .catch(function(){ btn.disabled=false; showCode(email, false); });
 });
 
 $('codeForm').addEventListener('submit', function(e){
@@ -225,7 +228,12 @@ if(ctaRead) ctaRead.addEventListener('click', function(e){ if(OF.isLoggedIn()) r
   setTimeout(function(){ if(!OF.isLoggedIn()) openForm(); }, 4000);
 })();
 
+/* show the account menu (top-right) when already logged in */
+function ofMountMenu(){ try{ if(OF.isLoggedIn()){ var fb=document.querySelector('.topbar .free'); if(fb) fb.style.display='none'; OF.mountUserMenu({into:'.topbar'}); } }catch(_){ } }
+ofMountMenu();
+
 function thanks(){
+  ofMountMenu();
   $('vCode').style.display='none'; $('vDetails').style.display='';
   $('joinForm').style.display='none'; $('altBtn').style.display='none'; $('altNote').style.display='none';
   $('dTitle').textContent='Welcome, Sevak 🙏';
