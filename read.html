@@ -423,6 +423,7 @@ for(var k=0;k<CH.length;k++){ if(CH[k].id===lastId){ startAt=k; break; } }
 openChapter(startAt, true);
 </script>
 <script>setInterval(function(){try{if(speaking&&!paused&&synth&&!synth.paused){synth.resume();}}catch(e){}},8000);</script>
+<script src="of-auth.js"></script>
 <style>
 /* ===== One Fast — Sevak (Volunteer) member space ===== */
 #ofBook{position:relative;height:24px;background:var(--cream-2);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:10px;padding:0 14px;font-size:11.5px;color:var(--muted);flex:0 0 auto}
@@ -455,6 +456,7 @@ openChapter(startAt, true);
 .of-q{display:flex;gap:8px;align-items:flex-start;background:var(--cream-2);border:1px solid var(--rule);border-radius:9px;padding:9px 11px;margin-bottom:8px;font-size:14.5px;line-height:1.5}
 .of-q .qx{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;flex:0 0 auto;line-height:1}
 .of-empty{font-size:13.5px;color:var(--muted);font-style:italic;text-align:center;padding:24px 10px}
+.of-synced{font-size:11.5px;color:var(--muted);text-align:center;padding:6px 0 0}
 #ofGate{position:fixed;inset:0;z-index:90;background:rgba(20,22,34,.64);display:none;align-items:center;justify-content:center;padding:16px}
 #ofGate.on{display:flex}
 #ofGate .card{background:var(--panel);border-radius:18px;max-width:440px;width:100%;padding:24px 24px 20px;box-shadow:0 26px 70px rgba(0,0,0,.42);max-height:94vh;overflow:auto}
@@ -480,17 +482,16 @@ openChapter(startAt, true);
 @media (max-width:760px){ .of-panel{width:100%} #ofFabs{bottom:14px;right:14px} }
 </style>
 <script>
-/* One Fast — Sevak (Volunteer) member space: login gate (after 2 free chapters),
-   notes, questions, reading/listening progress, and completion checkboxes.
-   Self-contained; hooks the existing reader (CH / openChapter / SENT / curCh / ofr_). */
+/* One Fast — Sevak (Volunteer) member space: email-code login gate (after 2 free
+   chapters), notes & questions with cloud sync, reading progress, completion ticks.
+   Auth + cloud sync provided by window.OF (of-auth.js). Self-contained otherwise. */
 (function(){
   if(typeof CH==='undefined' || !CH.length){ return; }
-  var SCRIPT_URL="https://script.google.com/macros/s/AKfycbwou749sCStHL5ASKbdY2w_8iFVqLMlwnRzbETVEN_BQJ8OosAA6sUBy0-la73bCyCU4w/exec";
   var FREE=2;
   function g(k){ try{return localStorage.getItem(k);}catch(_){return null;} }
   function set(k,v){ try{localStorage.setItem(k,v);}catch(_){ } }
   function isSevak(){ return !!g('ofr_sevak'); }
-  function unlock(n,e){ set('ofr_sevak','1'); if(n)set('ofr_sevak_name',n); if(e)set('ofr_sevak_email',e); }
+  function ofSync(){ if(window.OF && OF.sync) OF.sync(); }
 
   /* ---------- gate (wrap openChapter) ---------- */
   var realOpen = openChapter;
@@ -499,41 +500,93 @@ openChapter(startAt, true);
     if(ci>=FREE && !isSevak()){
       try{ stop(); }catch(_){ }
       showGate(ci);
-      setTimeout(function(){ try{ stop(); }catch(_){ } }, 60);   /* kill any auto-advance replay */
+      setTimeout(function(){ try{ stop(); }catch(_){ } }, 60);
       return;
     }
     return realOpen(ci, keepScroll, scrollToSid);
   };
-  function showGate(ci){ pendingCi=ci; gate.classList.add('on'); setTimeout(function(){ var e=document.getElementById('ofGn'); if(e) e.focus(); },60); }
+  function showGate(ci){ pendingCi=ci; gShowDetails('register'); gate.classList.add('on'); setTimeout(function(){ var e=document.getElementById('ofGe'); if(e) e.focus(); },60); }
   function hideGate(){ gate.classList.remove('on'); }
   function proceed(){ hideGate(); var ci=(pendingCi==null?FREE:pendingCi); pendingCi=null; realOpen(ci); decorateTOC(); paintBook(); }
 
   var gate=document.createElement('div'); gate.id='ofGate';
   gate.innerHTML='<div class="card">'+
-    '<h2>Create your Sevak <span class="v">(Volunteer)</span> login</h2>'+
-    '<p class="sub">You’ve read the first two chapters. Create your free login to read on — and to keep what is yours along the way.</p>'+
-    '<ul><li class="r">Read &amp; hear all fifteen chapters</li><li class="n">Save your own notes as you go</li><li class="q">Jot the questions that arise</li><li class="p">See how far you have journeyed</li></ul>'+
-    '<form id="ofGForm">'+
-    '<label>What shall we call you?</label><input id="ofGn" type="text" autocomplete="name" placeholder="Your name">'+
-    '<label>Email <span>(your login)</span></label><input id="ofGe" type="email" autocomplete="email" placeholder="you@example.com" required>'+
-    '<label>Mobile <span>(optional)</span></label><input id="ofGm" type="tel" autocomplete="tel" placeholder="Mobile number">'+
-    '<button class="go" type="submit">Create my Sevak login &amp; continue</button>'+
-    '<div class="msg" id="ofGmsg"></div>'+
-    '<div class="alt">Already a Sevak? <a id="ofGlogin">Log in</a></div>'+
-    '<div class="back"><a id="ofGback">Not now — back to the free chapters</a></div>'+
-    '<div class="foot">Free, always — you’re joining the seva.</div>'+
-    '</form></div>';
+    '<div id="ofGv1">'+
+      '<h2 id="ofGtitle">Create your Sevak <span class="v">(Volunteer)</span> login</h2>'+
+      '<p class="sub" id="ofGsub"></p>'+
+      '<ul id="ofGben"><li class="r">Read &amp; hear all fifteen chapters</li><li class="n">Save your own notes as you go</li><li class="q">Jot the questions that arise</li><li class="p">See how far you have journeyed</li></ul>'+
+      '<form id="ofGForm">'+
+        '<div id="ofGnameWrap"><label>What shall we call you?</label><input id="ofGn" type="text" autocomplete="name" placeholder="Your name"></div>'+
+        '<label>Email <span>(your login)</span></label><input id="ofGe" type="email" autocomplete="email" placeholder="you@example.com" required>'+
+        '<div id="ofGmobWrap"><label>Mobile <span>(optional)</span></label><input id="ofGm" type="tel" autocomplete="tel" placeholder="Mobile number"></div>'+
+        '<button class="go" type="submit" id="ofGsend">Create my Sevak login &amp; continue</button>'+
+        '<div class="msg" id="ofGmsg"></div>'+
+      '</form>'+
+      '<div class="alt" id="ofGaltRow">Already a Sevak? <a id="ofGalt">Log in</a></div>'+
+      '<div class="back"><a id="ofGback">Not now — back to the free chapters</a></div>'+
+      '<div class="foot">Free, always — you’re joining the seva.</div>'+
+    '</div>'+
+    '<div id="ofGv2" style="display:none">'+
+      '<h2>Enter your code</h2>'+
+      '<p class="sub">We’ve emailed a 6-digit code to <b id="ofGcEmail"></b>. Enter it to open your Sevak space.</p>'+
+      '<form id="ofGcodeForm">'+
+        '<label>6-digit code</label><input id="ofGc" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" style="letter-spacing:.3em;text-align:center;font-size:20px">'+
+        '<button class="go" type="submit" id="ofGverify">Verify &amp; continue</button>'+
+        '<div class="msg" id="ofGcmsg"></div>'+
+      '</form>'+
+      '<div class="back"><a id="ofGresend">Resend code</a> &nbsp;&middot;&nbsp; <a id="ofGchange">Change email</a> &nbsp;&middot;&nbsp; <a id="ofGskip">Trouble? Continue anyway</a></div>'+
+    '</div>'+
+  '</div>';
   document.body.appendChild(gate);
-  document.getElementById('ofGlogin').onclick=function(){ unlock(g('ofr_sevak_name'),g('ofr_sevak_email')); proceed(); };
+
+  var gmode='register', gpendEmail='', gpendName='', gpendMobile='';
+  function gcap(x){ x=String(x||''); return x.charAt(0).toUpperCase()+x.slice(1); }
+  function gReq(email,name,mobile,source){ return (window.OF && OF.requestCode)? OF.requestCode(email,name,mobile,source) : Promise.resolve({ok:false}); }
+  function gVer(email,code){ return (window.OF && OF.verifyCode)? OF.verifyCode(email,code) : Promise.resolve({ok:false}); }
+  function gLocal(email,name){ if(window.OF && OF.unlockLocal) OF.unlockLocal(email,name); else { set('ofr_sevak','1'); if(email)set('ofr_sevak_email',email); if(name)set('ofr_sevak_name',name); } }
+  function gShowDetails(m){
+    gmode=m; var reg=(m==='register');
+    document.getElementById('ofGv1').style.display=''; document.getElementById('ofGv2').style.display='none';
+    document.getElementById('ofGnameWrap').style.display=reg?'':'none';
+    document.getElementById('ofGmobWrap').style.display=reg?'':'none';
+    document.getElementById('ofGben').style.display=reg?'':'none';
+    document.getElementById('ofGtitle').innerHTML=reg?'Create your Sevak <span class="v">(Volunteer)</span> login':'Sevak <span class="v">(Volunteer)</span> login';
+    document.getElementById('ofGsub').textContent=reg?'You’ve read the first two chapters. Create your free login to read on — and to keep what is yours along the way.':'Welcome back. Enter your email and we’ll send a one-time code — your notes and questions will be just as you left them.';
+    document.getElementById('ofGsend').innerHTML=reg?'Create my Sevak login &amp; continue':'Email me a login code';
+    document.getElementById('ofGaltRow').innerHTML=reg?'Already a Sevak? <a id="ofGalt">Log in</a>':'New here? <a id="ofGalt">Create a login</a>';
+    document.getElementById('ofGalt').onclick=function(){ gShowDetails(reg?'login':'register'); };
+    document.getElementById('ofGmsg').textContent='';
+  }
+  function gShowCode(email){
+    gpendEmail=email;
+    document.getElementById('ofGv1').style.display='none'; document.getElementById('ofGv2').style.display='';
+    document.getElementById('ofGcEmail').textContent=email; document.getElementById('ofGcmsg').textContent=''; document.getElementById('ofGc').value='';
+    setTimeout(function(){ var e=document.getElementById('ofGc'); if(e) e.focus(); },60);
+  }
   document.getElementById('ofGback').onclick=function(){ hideGate(); realOpen(FREE-1); };
   document.getElementById('ofGForm').addEventListener('submit', function(ev){
     ev.preventDefault();
-    var n=document.getElementById('ofGn').value.trim(), e=document.getElementById('ofGe').value.trim(), m=document.getElementById('ofGm').value.trim();
-    if(!e || e.indexOf('@')<1){ document.getElementById('ofGmsg').textContent='Please enter a valid email.'; return; }
-    unlock(n,e);
-    try{ fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({name:n,email:e,mobile:m,source:'onefast-reader'})}); }catch(_){ }
-    proceed();
+    var e=document.getElementById('ofGe').value.trim();
+    if(!e||e.indexOf('@')<1){ document.getElementById('ofGmsg').textContent='Please enter a valid email.'; return; }
+    gpendName=document.getElementById('ofGn')?document.getElementById('ofGn').value.trim():'';
+    gpendMobile=document.getElementById('ofGm')?document.getElementById('ofGm').value.trim():'';
+    var b=document.getElementById('ofGsend'); b.disabled=true; document.getElementById('ofGmsg').textContent='Sending your code…';
+    gReq(e, gpendName, gpendMobile, gmode==='login'?'onefast-reader-login':'onefast-reader')
+      .then(function(){ b.disabled=false; gShowCode(e); }).catch(function(){ b.disabled=false; gShowCode(e); });
   });
+  document.getElementById('ofGcodeForm').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var c=document.getElementById('ofGc').value.trim();
+    if(c.length<4){ document.getElementById('ofGcmsg').textContent='Enter the 6-digit code.'; return; }
+    var b=document.getElementById('ofGverify'); b.disabled=true; document.getElementById('ofGcmsg').textContent='Checking…';
+    gVer(gpendEmail, c).then(function(res){
+      b.disabled=false;
+      if(res && res.ok){ proceed(); } else { document.getElementById('ofGcmsg').textContent=(res&&res.error)?gcap(res.error):'That code did not work — try again.'; }
+    }).catch(function(){ b.disabled=false; document.getElementById('ofGcmsg').textContent='Network hiccup — try again, or continue anyway.'; });
+  });
+  document.getElementById('ofGresend').onclick=function(){ gReq(gpendEmail, gpendName, gpendMobile, 'onefast-reader'); document.getElementById('ofGcmsg').textContent='Code re-sent. Check your inbox (and spam).'; };
+  document.getElementById('ofGchange').onclick=function(){ gShowDetails(gmode); };
+  document.getElementById('ofGskip').onclick=function(){ gLocal(gpendEmail, gpendName); proceed(); };
 
   /* ---------- progress ---------- */
   var TW=CH.reduce(function(a,c){return a+(c.words||0);},0)||1;
@@ -603,11 +656,13 @@ openChapter(startAt, true);
   var noteP=document.createElement('div'); noteP.className='of-panel'; noteP.id='ofNoteP';
   noteP.innerHTML='<header><span class="t">📝 My Notes</span><button id="ofNoteX" aria-label="Close">✕</button></header>'+
     '<div class="body"><div id="ofNoteCh"></div><p class="hint">Your reflections for this chapter — saved as you write.</p>'+
-    '<textarea id="ofNoteArea" placeholder="A thought, a line that moved you, a resolve…"></textarea></div>';
+    '<textarea id="ofNoteArea" placeholder="A thought, a line that moved you, a resolve…"></textarea>'+
+    '<div class="of-synced" id="ofNoteSync"></div></div>';
   document.body.appendChild(noteP);
   var noteArea=document.getElementById('ofNoteArea'), noteCh=document.getElementById('ofNoteCh'), noteT;
-  function saveNoteNow(){ if(noteArea.dataset.ch){ set('ofr_note_'+noteArea.dataset.ch, noteArea.value); } }
-  function loadNote(){ var c=CH[curCh]; var h=(typeof chapHead==='function')?chapHead(c.part):{title:c.part}; noteCh.textContent=h.title||c.part; noteArea.dataset.ch=c.id; noteArea.value=g('ofr_note_'+c.id)||''; }
+  function syncLabel(el){ if(el) el.textContent = (window.OF && OF.hasAccount && OF.hasAccount()) ? '☁ Saved to your Sevak account' : 'Saved on this device'; }
+  function saveNoteNow(){ if(noteArea.dataset.ch){ set('ofr_note_'+noteArea.dataset.ch, noteArea.value); ofSync(); } }
+  function loadNote(){ var c=CH[curCh]; var h=(typeof chapHead==='function')?chapHead(c.part):{title:c.part}; noteCh.textContent=h.title||c.part; noteArea.dataset.ch=c.id; noteArea.value=g('ofr_note_'+c.id)||''; syncLabel(document.getElementById('ofNoteSync')); }
   noteArea.addEventListener('input', function(){ clearTimeout(noteT); noteT=setTimeout(saveNoteNow,300); });
   document.getElementById('ofNoteX').onclick=function(){ saveNoteNow(); noteP.classList.remove('on'); };
   function openNotes(){ loadNote(); noteP.classList.add('on'); }
@@ -617,21 +672,24 @@ openChapter(startAt, true);
   qP.innerHTML='<header><span class="t">❓ My Questions</span><button id="ofQX" aria-label="Close">✕</button></header>'+
     '<div class="body"><p class="hint">Questions to sit with, or to ask later — saved for you.</p>'+
     '<div class="of-qadd"><input id="ofQin" type="text" placeholder="Type a question…"><button id="ofQadd">Add</button></div>'+
-    '<div id="ofQlist"></div></div>';
+    '<div id="ofQlist"></div><div class="of-synced" id="ofQSync"></div></div>';
   document.body.appendChild(qP);
   function getQs(){ try{ return JSON.parse(g('ofr_q')||'[]'); }catch(_){ return []; } }
-  function setQs(a){ set('ofr_q', JSON.stringify(a)); }
+  function setQs(a){ set('ofr_q', JSON.stringify(a)); ofSync(); }
   function renderQs(){
     var a=getQs(), wrap=document.getElementById('ofQlist');
-    if(!a.length){ wrap.innerHTML='<div class="of-empty">No questions yet. Add the first one that rises in your heart.</div>'; return; }
-    wrap.innerHTML='';
-    a.forEach(function(q,i){
-      var row=document.createElement('div'); row.className='of-q';
-      var sp=document.createElement('span'); sp.textContent=q; row.appendChild(sp);
-      var x=document.createElement('button'); x.className='qx'; x.innerHTML='✕'; x.title='Remove';
-      x.onclick=function(){ var arr=getQs(); arr.splice(i,1); setQs(arr); renderQs(); };
-      row.appendChild(x); wrap.appendChild(row);
-    });
+    if(!a.length){ wrap.innerHTML='<div class="of-empty">No questions yet. Add the first one that rises in your heart.</div>'; }
+    else {
+      wrap.innerHTML='';
+      a.forEach(function(q,i){
+        var row=document.createElement('div'); row.className='of-q';
+        var sp=document.createElement('span'); sp.textContent=q; row.appendChild(sp);
+        var x=document.createElement('button'); x.className='qx'; x.innerHTML='✕'; x.title='Remove';
+        x.onclick=function(){ var arr=getQs(); arr.splice(i,1); setQs(arr); renderQs(); };
+        row.appendChild(x); wrap.appendChild(row);
+      });
+    }
+    syncLabel(document.getElementById('ofQSync'));
   }
   function addQ(){ var inp=document.getElementById('ofQin'); var v=inp.value.trim(); if(!v)return; var a=getQs(); a.push(v); setQs(a); inp.value=''; renderQs(); }
   document.getElementById('ofQadd').onclick=addQ;
@@ -646,6 +704,9 @@ openChapter(startAt, true);
   document.getElementById('ofFabN').onclick=openNotes;
   document.getElementById('ofFabQ').onclick=openQ;
 
+  /* refresh notes/questions after a cloud pull on login */
+  window.OF_onSync = function(){ try{ renderQs(); if(noteP.classList.contains('on')) loadNote(); }catch(_){ } };
+
   /* ---------- init ---------- */
   decorateTOC();
   paintBook();
@@ -653,7 +714,6 @@ openChapter(startAt, true);
   var lastCh=curCh;
   setInterval(function(){ if(curCh!==lastCh){ if(noteP.classList.contains('on')){ saveNoteNow(); loadNote(); } lastCh=curCh; paintAllChBars(); } }, 700);
   window.addEventListener('beforeunload', saveNoteNow);
-  /* if the saved last-read chapter is gated and the visitor isn't a Sevak, raise the gate */
   if(curCh>=FREE && !isSevak()){ showGate(curCh); }
 })();
 </script>
