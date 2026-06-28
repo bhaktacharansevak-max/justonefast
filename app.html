@@ -116,6 +116,7 @@
         <form class="join" id="joinForm">
           <input id="jn" type="text" autocomplete="name" placeholder="Your name">
           <input id="je" type="email" autocomplete="email" placeholder="you@example.com" required>
+          <input id="jm" type="tel" autocomplete="tel" placeholder="Mobile (optional)">
           <button class="send" type="submit" id="sendBtn">Keep me posted</button>
           <div class="msg" id="joinMsg"></div>
         </form>
@@ -273,11 +274,12 @@ document.getElementById('joinForm').addEventListener('submit', function(ev){
   ev.preventDefault();
   var name=document.getElementById('jn').value.trim();
   var email=document.getElementById('je').value.trim();
+  var mobile=document.getElementById('jm').value.trim();
   var msg=document.getElementById('joinMsg'), btn=document.getElementById('sendBtn');
   if(!email || email.indexOf('@')<1){ msg.textContent='Please enter a valid email.'; return; }
   btn.disabled=true; msg.textContent='Sending…';
   fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify({name:name, email:email, source:'onefast-app'})})
+    body: JSON.stringify({name:name, email:email, mobile:mobile, source:'onefast-app'})})
     .then(function(r){ return r.json(); }).then(done).catch(done);
   function done(){
     document.getElementById('joinForm').innerHTML =
