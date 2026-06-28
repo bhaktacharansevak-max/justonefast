@@ -105,23 +105,23 @@
     </div>
   </div>
 
-  <button class="fab" id="fab"><span class="fl">&#9790;</span> Stay in touch</button>
+  <button class="fab" id="fab"><span class="fl">&#9790;</span> Become a Sevak (Volunteer)</button>
 
   <div class="overlay" id="overlay">
     <div class="card">
       <button class="x" id="closeBtn" aria-label="Close">&times;</button>
-      <h2>Keep a day for God with us</h2>
-      <p class="lead">Leave your name and email to become an Ekadashi Sevak — for gentle reminders of the fast days and simple ways to take part. No spam, ever.</p>
+      <h2>Get your free Sevak <span style="color:var(--muted);font-weight:400">(Volunteer)</span> login</h2>
+      <p class="lead">Read and hear the whole book — and download the companion app — free. Your login keeps your place, your notes, and your questions, all in one place.</p>
       <form id="joinForm">
-        <label for="jn">Your name</label>
-        <input id="jn" type="text" autocomplete="name" placeholder="Name">
-        <label for="je">Your email</label>
+        <label for="jn">What shall we call you?</label>
+        <input id="jn" type="text" autocomplete="name" placeholder="Your name">
+        <label for="je">Email <span style="font-weight:400;color:var(--muted)">(your login)</span></label>
         <input id="je" type="email" autocomplete="email" placeholder="you@example.com" required>
-        <label for="jm">Your mobile <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <label for="jm">Mobile <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
         <input id="jm" type="tel" autocomplete="tel" placeholder="Mobile number">
-        <button class="send" id="sendBtn" type="submit">Keep me posted</button>
+        <button class="send" id="sendBtn" type="submit">Create my Sevak login &amp; continue</button>
         <div class="msg" id="formMsg"></div>
-        <div class="privacy">We'll only write to share fast-day reminders and seva — never sold or shared.</div>
+        <div class="privacy"><a href="#" id="laterBtn" style="color:var(--muted)">Maybe later</a> &nbsp;&middot;&nbsp; Free, always — you're joining the seva</div>
       </form>
     </div>
   </div>
@@ -137,6 +137,18 @@ document.getElementById('fab').onclick=openForm;
 document.getElementById('closeBtn').onclick=closeForm;
 overlay.addEventListener('click', function(e){ if(e.target===overlay) closeForm(); });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeForm(); });
+var laterBtn=document.getElementById('laterBtn');
+if(laterBtn) laterBtn.onclick=function(e){ e.preventDefault(); closeForm(); };
+
+/* Greet every new visitor with the Sevak login (once per session; never if already joined) */
+(function(){
+  try{
+    if(localStorage.getItem('ofr_sevak')) return;
+    if(sessionStorage.getItem('ofr_popup_shown')) return;
+    sessionStorage.setItem('ofr_popup_shown','1');
+  }catch(_){ }
+  setTimeout(openForm, 1200);
+})();
 
 var msgEl=document.getElementById('formMsg'), sendBtn=document.getElementById('sendBtn');
 function msg(t, cls){ msgEl.textContent=t; msgEl.className='msg'+(cls?(' '+cls):''); }
@@ -148,6 +160,7 @@ document.getElementById('joinForm').addEventListener('submit', function(e){
   var mobile=document.getElementById('jm').value.trim();
   if(!email || email.indexOf('@')<1){ msg('Please enter a valid email.', 'err'); return; }
   if(!SCRIPT_URL){ msg("We're just finishing setup — please check back very soon.", 'ok'); return; }
+  try{ localStorage.setItem('ofr_sevak','1'); localStorage.setItem('ofr_sevak_name',name); localStorage.setItem('ofr_sevak_email',email); }catch(_){ }
   sendBtn.disabled=true; msg('Sending…');
   fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
     body: JSON.stringify({name:name, email:email, mobile:mobile, source:'onefast-home'})})
@@ -156,10 +169,10 @@ document.getElementById('joinForm').addEventListener('submit', function(e){
    .catch(function(){ thanks(); });
 });
 function thanks(){
-  document.querySelector('.card h2').textContent='Thank you';
-  document.querySelector('.card .lead').textContent="We're glad you're here. We'll be in touch gently, with fast-day reminders and ways to take part.";
+  document.querySelector('.card h2').textContent='Welcome, Sevak 🙏';
+  document.querySelector('.card .lead').innerHTML="Your login is ready. The whole book is open to you — and the companion app is yours to download.<br><br><a href=\"read.html\" style=\"color:var(--green);font-weight:700;text-decoration:none\">Read or listen &#8594;</a> &nbsp;&middot;&nbsp; <a href=\"app.html\" style=\"color:var(--green);font-weight:700;text-decoration:none\">Get the app &#8594;</a>";
   document.getElementById('joinForm').style.display='none';
-  setTimeout(closeForm, 2600);
+  setTimeout(closeForm, 5200);
 }
 </script>
 </body>
