@@ -423,5 +423,239 @@ for(var k=0;k<CH.length;k++){ if(CH[k].id===lastId){ startAt=k; break; } }
 openChapter(startAt, true);
 </script>
 <script>setInterval(function(){try{if(speaking&&!paused&&synth&&!synth.paused){synth.resume();}}catch(e){}},8000);</script>
+<style>
+/* ===== One Fast — Sevak (Volunteer) member space ===== */
+#ofBook{position:relative;height:24px;background:var(--cream-2);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:10px;padding:0 14px;font-size:11.5px;color:var(--muted);flex:0 0 auto}
+#ofBook .track{flex:1;height:6px;background:var(--rule);border-radius:9px;overflow:hidden}
+#ofBook .fill{height:100%;width:0;background:linear-gradient(90deg,var(--green-soft),var(--leaf));border-radius:9px;transition:width .4s}
+#ofBook .lbl{white-space:nowrap;font-weight:700;color:var(--green)}
+#ofBook .cnt{white-space:nowrap}
+.of-cbx{flex:0 0 auto;width:17px;height:17px;margin-top:1px;accent-color:var(--leaf);cursor:pointer}
+.tocrow .of-cprog{height:4px;background:var(--rule);border-radius:6px;margin:6px 0 0;overflow:hidden}
+.tocrow .of-cprog i{display:block;height:100%;width:0;background:var(--leaf);border-radius:6px;transition:width .4s}
+.tocrow.of-done .tt, .subrow.of-done{opacity:.7}
+.tocrow.of-done .tt:after{content:" ✓";color:var(--leaf);font-weight:700}
+#ofFabs{position:fixed;right:16px;bottom:16px;z-index:60;display:flex;flex-direction:column;gap:11px}
+#ofFabs button{width:50px;height:50px;border-radius:50%;border:none;color:#fff;font-size:21px;cursor:pointer;box-shadow:0 6px 18px rgba(44,55,107,.34);transition:transform .12s}
+#ofFabs button:active{transform:scale(.94)}
+#ofFabs #ofFabN{background:var(--green)} #ofFabs #ofFabQ{background:var(--leaf);color:#2a2207}
+.of-panel{position:fixed;top:0;right:0;height:100%;width:370px;max-width:92vw;background:var(--panel);border-left:1px solid var(--rule);box-shadow:-10px 0 30px rgba(0,0,0,.18);z-index:70;transform:translateX(106%);transition:transform .26s;display:flex;flex-direction:column}
+.of-panel.on{transform:none}
+.of-panel header{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--green);color:#fff;flex:0 0 auto}
+.of-panel header .t{font-size:16px;font-weight:700;flex:1}
+.of-panel header button{background:rgba(255,255,255,.2);border:none;color:#fff;font-size:17px;width:32px;height:32px;border-radius:8px;cursor:pointer}
+.of-panel .body{flex:1;overflow:auto;padding:14px 16px}
+.of-panel .hint{font-size:12.5px;color:var(--muted);font-style:italic;margin:0 0 10px;line-height:1.5}
+#ofNoteCh{font-size:12px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+#ofNoteArea{width:100%;min-height:260px;font-family:inherit;font-size:15px;line-height:1.6;border:1px solid var(--rule);border-radius:10px;padding:12px;background:#fff;color:var(--ink);resize:vertical}
+.of-qadd{display:flex;gap:7px;margin-bottom:12px}
+.of-qadd input{flex:1;font-family:inherit;font-size:14.5px;padding:10px 11px;border:1px solid var(--rule);border-radius:9px;background:#fff;color:var(--ink)}
+.of-qadd input:focus{outline:none;border-color:var(--leaf)}
+.of-qadd button{background:var(--leaf);color:#2a2207;border:none;font-family:inherit;font-weight:700;border-radius:9px;padding:0 16px;cursor:pointer}
+.of-q{display:flex;gap:8px;align-items:flex-start;background:var(--cream-2);border:1px solid var(--rule);border-radius:9px;padding:9px 11px;margin-bottom:8px;font-size:14.5px;line-height:1.5}
+.of-q .qx{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;flex:0 0 auto;line-height:1}
+.of-empty{font-size:13.5px;color:var(--muted);font-style:italic;text-align:center;padding:24px 10px}
+#ofGate{position:fixed;inset:0;z-index:90;background:rgba(20,22,34,.64);display:none;align-items:center;justify-content:center;padding:16px}
+#ofGate.on{display:flex}
+#ofGate .card{background:var(--panel);border-radius:18px;max-width:440px;width:100%;padding:24px 24px 20px;box-shadow:0 26px 70px rgba(0,0,0,.42);max-height:94vh;overflow:auto}
+#ofGate h2{color:var(--green);font-size:23px;margin:0 0 5px;line-height:1.2}
+#ofGate h2 .v{color:var(--muted);font-weight:400}
+#ofGate .sub{color:var(--muted);font-size:14.5px;margin:0 0 14px;line-height:1.5}
+#ofGate ul{list-style:none;margin:0 0 16px;padding:0}
+#ofGate li{font-size:14.5px;color:var(--ink);padding:5px 0 5px 28px;position:relative}
+#ofGate li:before{position:absolute;left:0;top:4px;font-size:15px}
+#ofGate li.r:before{content:"📖"} #ofGate li.n:before{content:"📝"} #ofGate li.q:before{content:"❓"} #ofGate li.p:before{content:"📊"}
+#ofGate label{display:block;font-size:12.5px;color:var(--green);font-weight:700;margin:10px 0 4px}
+#ofGate label span{font-weight:400;color:var(--muted)}
+#ofGate input{width:100%;font-family:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--rule);border-radius:10px;background:#fff;color:var(--ink)}
+#ofGate input:focus{outline:none;border-color:var(--leaf)}
+#ofGate .go{width:100%;margin-top:16px;background:var(--green);color:#fff;border:none;font-family:inherit;font-size:16.5px;font-weight:700;padding:13px;border-radius:12px;cursor:pointer}
+#ofGate .go:hover{background:var(--green-soft)}
+#ofGate .alt{text-align:center;font-size:13.5px;margin-top:13px}
+#ofGate .alt a{color:var(--green);font-weight:700;cursor:pointer;text-decoration:underline}
+#ofGate .back{text-align:center;font-size:12.5px;margin-top:9px}
+#ofGate .back a{color:var(--muted);cursor:pointer}
+#ofGate .foot{text-align:center;font-size:12px;color:var(--muted);margin-top:12px;border-top:1px solid var(--rule);padding-top:11px}
+#ofGate .msg{font-size:13.5px;text-align:center;min-height:1em;margin-top:8px;color:var(--green)}
+@media (max-width:760px){ .of-panel{width:100%} #ofFabs{bottom:14px;right:14px} }
+</style>
+<script>
+/* One Fast — Sevak (Volunteer) member space: login gate (after 2 free chapters),
+   notes, questions, reading/listening progress, and completion checkboxes.
+   Self-contained; hooks the existing reader (CH / openChapter / SENT / curCh / ofr_). */
+(function(){
+  if(typeof CH==='undefined' || !CH.length){ return; }
+  var SCRIPT_URL="https://script.google.com/macros/s/AKfycbwou749sCStHL5ASKbdY2w_8iFVqLMlwnRzbETVEN_BQJ8OosAA6sUBy0-la73bCyCU4w/exec";
+  var FREE=2;
+  function g(k){ try{return localStorage.getItem(k);}catch(_){return null;} }
+  function set(k,v){ try{localStorage.setItem(k,v);}catch(_){ } }
+  function isSevak(){ return !!g('ofr_sevak'); }
+  function unlock(n,e){ set('ofr_sevak','1'); if(n)set('ofr_sevak_name',n); if(e)set('ofr_sevak_email',e); }
+
+  /* ---------- gate (wrap openChapter) ---------- */
+  var realOpen = openChapter;
+  var pendingCi = null;
+  openChapter = function(ci, keepScroll, scrollToSid){
+    if(ci>=FREE && !isSevak()){
+      try{ stop(); }catch(_){ }
+      showGate(ci);
+      setTimeout(function(){ try{ stop(); }catch(_){ } }, 60);   /* kill any auto-advance replay */
+      return;
+    }
+    return realOpen(ci, keepScroll, scrollToSid);
+  };
+  function showGate(ci){ pendingCi=ci; gate.classList.add('on'); setTimeout(function(){ var e=document.getElementById('ofGn'); if(e) e.focus(); },60); }
+  function hideGate(){ gate.classList.remove('on'); }
+  function proceed(){ hideGate(); var ci=(pendingCi==null?FREE:pendingCi); pendingCi=null; realOpen(ci); decorateTOC(); paintBook(); }
+
+  var gate=document.createElement('div'); gate.id='ofGate';
+  gate.innerHTML='<div class="card">'+
+    '<h2>Create your Sevak <span class="v">(Volunteer)</span> login</h2>'+
+    '<p class="sub">You’ve read the first two chapters. Create your free login to read on — and to keep what is yours along the way.</p>'+
+    '<ul><li class="r">Read &amp; hear all fifteen chapters</li><li class="n">Save your own notes as you go</li><li class="q">Jot the questions that arise</li><li class="p">See how far you have journeyed</li></ul>'+
+    '<form id="ofGForm">'+
+    '<label>What shall we call you?</label><input id="ofGn" type="text" autocomplete="name" placeholder="Your name">'+
+    '<label>Email <span>(your login)</span></label><input id="ofGe" type="email" autocomplete="email" placeholder="you@example.com" required>'+
+    '<label>Mobile <span>(optional)</span></label><input id="ofGm" type="tel" autocomplete="tel" placeholder="Mobile number">'+
+    '<button class="go" type="submit">Create my Sevak login &amp; continue</button>'+
+    '<div class="msg" id="ofGmsg"></div>'+
+    '<div class="alt">Already a Sevak? <a id="ofGlogin">Log in</a></div>'+
+    '<div class="back"><a id="ofGback">Not now — back to the free chapters</a></div>'+
+    '<div class="foot">Free, always — you’re joining the seva.</div>'+
+    '</form></div>';
+  document.body.appendChild(gate);
+  document.getElementById('ofGlogin').onclick=function(){ unlock(g('ofr_sevak_name'),g('ofr_sevak_email')); proceed(); };
+  document.getElementById('ofGback').onclick=function(){ hideGate(); realOpen(FREE-1); };
+  document.getElementById('ofGForm').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var n=document.getElementById('ofGn').value.trim(), e=document.getElementById('ofGe').value.trim(), m=document.getElementById('ofGm').value.trim();
+    if(!e || e.indexOf('@')<1){ document.getElementById('ofGmsg').textContent='Please enter a valid email.'; return; }
+    unlock(n,e);
+    try{ fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({name:n,email:e,mobile:m,source:'onefast-reader'})}); }catch(_){ }
+    proceed();
+  });
+
+  /* ---------- progress ---------- */
+  var TW=CH.reduce(function(a,c){return a+(c.words||0);},0)||1;
+  function chFrac(ci){ var v=parseFloat(g('ofr_prog_'+CH[ci].id)||'0'); return (isNaN(v)?0:Math.max(0,Math.min(1,v))); }
+  function scrollFrac(){
+    try{
+      var el=readerEl, sh=el.scrollHeight-el.clientHeight;
+      if(sh>40) return Math.min(1, el.scrollTop/sh);
+      var d=document.documentElement, sh2=d.scrollHeight-window.innerHeight;
+      return sh2>40 ? Math.min(1,(window.scrollY||d.scrollTop||0)/sh2) : 0;
+    }catch(_){ return 0; }
+  }
+  function liveFrac(){
+    var byL=(typeof SENT!=='undefined' && SENT.length)? Math.min(1,(idx+1)/SENT.length) : 0;
+    return Math.max(byL, scrollFrac());
+  }
+  var book=document.createElement('div'); book.id='ofBook';
+  book.innerHTML='<span class="lbl" id="ofBookPct">0%</span><div class="track"><div class="fill" id="ofBookFill"></div></div><span class="cnt" id="ofBookCount"></span>';
+  var mainEl=document.querySelector('main'); if(mainEl) mainEl.insertBefore(book, mainEl.firstChild);
+  function bookFrac(){ var sum=0; for(var i=0;i<CH.length;i++){ sum += chFrac(i)*(CH[i].words||0); } return sum/TW; }
+  function paintBook(){
+    var pct=Math.round(bookFrac()*100);
+    document.getElementById('ofBookFill').style.width=pct+'%';
+    document.getElementById('ofBookPct').textContent=pct+'% of the book';
+    var done=0; for(var i=0;i<CH.length;i++){ if(g('ofr_donech_'+CH[i].id)==='1') done++; }
+    document.getElementById('ofBookCount').textContent=done+' / '+CH.length+' chapters done';
+  }
+  function paintChBar(ci){ var row=document.querySelector('.tocrow[data-ci="'+ci+'"]'); if(!row)return; var b=row.querySelector('.of-cprog i'); if(b) b.style.width=Math.round(chFrac(ci)*100)+'%'; }
+  function paintAllChBars(){ for(var i=0;i<CH.length;i++) paintChBar(i); }
+
+  /* ---------- decorate TOC with checkboxes + per-chapter progress ---------- */
+  function decorateTOC(){
+    document.querySelectorAll('.tocrow').forEach(function(row){
+      var ci=+row.dataset.ci; var ch=CH[ci];
+      if(!row.querySelector('.of-cbx')){
+        var cb=document.createElement('input'); cb.type='checkbox'; cb.className='of-cbx'; cb.title='Mark chapter complete';
+        cb.checked=g('ofr_donech_'+ch.id)==='1';
+        cb.addEventListener('click', function(e){ e.stopPropagation(); });
+        cb.addEventListener('change', function(){ set('ofr_donech_'+ch.id, cb.checked?'1':'0'); if(cb.checked) set('ofr_prog_'+ch.id,'1'); row.classList.toggle('of-done', cb.checked); paintBook(); paintChBar(ci); });
+        row.insertBefore(cb, row.firstChild);
+        row.classList.toggle('of-done', cb.checked);
+        var tt=row.querySelector('.tt');
+        if(tt && !tt.querySelector('.of-cprog')){ var pr=document.createElement('div'); pr.className='of-cprog'; pr.innerHTML='<i></i>'; tt.appendChild(pr); }
+      }
+    });
+    document.querySelectorAll('.subrow').forEach(function(sub){
+      if(sub.querySelector('.of-cbx')) return;
+      var sid=sub.dataset.sid;
+      var cb=document.createElement('input'); cb.type='checkbox'; cb.className='of-cbx'; cb.title='Mark section complete';
+      cb.checked=g('ofr_done_'+sid)==='1';
+      cb.addEventListener('click', function(e){ e.stopPropagation(); });
+      cb.addEventListener('change', function(){ set('ofr_done_'+sid, cb.checked?'1':'0'); sub.classList.toggle('of-done', cb.checked); });
+      sub.insertBefore(cb, sub.firstChild);
+      sub.classList.toggle('of-done', cb.checked);
+    });
+    paintAllChBars();
+  }
+
+  /* ---------- live progress polling ---------- */
+  setInterval(function(){
+    var ci=curCh; if(ci==null||!CH[ci]) return;
+    var f=liveFrac(); var prev=chFrac(ci);
+    if(f>prev+0.001){ set('ofr_prog_'+CH[ci].id, f.toFixed(3)); paintChBar(ci); paintBook(); }
+  }, 900);
+
+  /* ---------- notes ---------- */
+  var noteP=document.createElement('div'); noteP.className='of-panel'; noteP.id='ofNoteP';
+  noteP.innerHTML='<header><span class="t">📝 My Notes</span><button id="ofNoteX" aria-label="Close">✕</button></header>'+
+    '<div class="body"><div id="ofNoteCh"></div><p class="hint">Your reflections for this chapter — saved as you write.</p>'+
+    '<textarea id="ofNoteArea" placeholder="A thought, a line that moved you, a resolve…"></textarea></div>';
+  document.body.appendChild(noteP);
+  var noteArea=document.getElementById('ofNoteArea'), noteCh=document.getElementById('ofNoteCh'), noteT;
+  function saveNoteNow(){ if(noteArea.dataset.ch){ set('ofr_note_'+noteArea.dataset.ch, noteArea.value); } }
+  function loadNote(){ var c=CH[curCh]; var h=(typeof chapHead==='function')?chapHead(c.part):{title:c.part}; noteCh.textContent=h.title||c.part; noteArea.dataset.ch=c.id; noteArea.value=g('ofr_note_'+c.id)||''; }
+  noteArea.addEventListener('input', function(){ clearTimeout(noteT); noteT=setTimeout(saveNoteNow,300); });
+  document.getElementById('ofNoteX').onclick=function(){ saveNoteNow(); noteP.classList.remove('on'); };
+  function openNotes(){ loadNote(); noteP.classList.add('on'); }
+
+  /* ---------- questions ---------- */
+  var qP=document.createElement('div'); qP.className='of-panel'; qP.id='ofQP';
+  qP.innerHTML='<header><span class="t">❓ My Questions</span><button id="ofQX" aria-label="Close">✕</button></header>'+
+    '<div class="body"><p class="hint">Questions to sit with, or to ask later — saved for you.</p>'+
+    '<div class="of-qadd"><input id="ofQin" type="text" placeholder="Type a question…"><button id="ofQadd">Add</button></div>'+
+    '<div id="ofQlist"></div></div>';
+  document.body.appendChild(qP);
+  function getQs(){ try{ return JSON.parse(g('ofr_q')||'[]'); }catch(_){ return []; } }
+  function setQs(a){ set('ofr_q', JSON.stringify(a)); }
+  function renderQs(){
+    var a=getQs(), wrap=document.getElementById('ofQlist');
+    if(!a.length){ wrap.innerHTML='<div class="of-empty">No questions yet. Add the first one that rises in your heart.</div>'; return; }
+    wrap.innerHTML='';
+    a.forEach(function(q,i){
+      var row=document.createElement('div'); row.className='of-q';
+      var sp=document.createElement('span'); sp.textContent=q; row.appendChild(sp);
+      var x=document.createElement('button'); x.className='qx'; x.innerHTML='✕'; x.title='Remove';
+      x.onclick=function(){ var arr=getQs(); arr.splice(i,1); setQs(arr); renderQs(); };
+      row.appendChild(x); wrap.appendChild(row);
+    });
+  }
+  function addQ(){ var inp=document.getElementById('ofQin'); var v=inp.value.trim(); if(!v)return; var a=getQs(); a.push(v); setQs(a); inp.value=''; renderQs(); }
+  document.getElementById('ofQadd').onclick=addQ;
+  document.getElementById('ofQin').addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); addQ(); } });
+  document.getElementById('ofQX').onclick=function(){ qP.classList.remove('on'); };
+  function openQ(){ renderQs(); qP.classList.add('on'); }
+
+  /* ---------- FABs ---------- */
+  var fabs=document.createElement('div'); fabs.id='ofFabs';
+  fabs.innerHTML='<button id="ofFabN" title="My notes">📝</button><button id="ofFabQ" title="My questions">❓</button>';
+  document.body.appendChild(fabs);
+  document.getElementById('ofFabN').onclick=openNotes;
+  document.getElementById('ofFabQ').onclick=openQ;
+
+  /* ---------- init ---------- */
+  decorateTOC();
+  paintBook();
+  loadNote();
+  var lastCh=curCh;
+  setInterval(function(){ if(curCh!==lastCh){ if(noteP.classList.contains('on')){ saveNoteNow(); loadNote(); } lastCh=curCh; paintAllChBars(); } }, 700);
+  window.addEventListener('beforeunload', saveNoteNow);
+  /* if the saved last-read chapter is gated and the visitor isn't a Sevak, raise the gate */
+  if(curCh>=FREE && !isSevak()){ showGate(curCh); }
+})();
+</script>
 </body>
 </html>
