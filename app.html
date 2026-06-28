@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="The One Fast companion — a live countdown to the next Ekadashi, the fast and break-fast days, gentle reminders, and the whole book to read or hear, free.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%232c376b'/><path d='M40 18 a16 16 0 1 0 0 28 a12.5 12.5 0 1 1 0 -28z' fill='%23E8CD7C'/></svg>">
+<title>One Fast — Companion</title>
+<meta name="theme-color" content="#2c376b">
+<style>
+  :root{
+    --navy:#2c376b; --navy-soft:#3b4a8a; --gold:#c2922e; --gold-soft:#e8cd7c;
+    --cream:#fbf7ee; --cream-2:#eef0f8; --panel:#fffdf8;
+    --ink:#20242e; --muted:#5d6376; --rule:#e3e1d2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--cream); color:var(--ink);
+    font-family:"Palatino Linotype","Book Antiqua",Palatino,Garamond,Georgia,serif; line-height:1.6;
+    -webkit-tap-highlight-color:transparent}
+  .topbar{display:flex; align-items:center; gap:10px; padding:13px 18px; background:var(--navy); color:#fff; position:sticky; top:0; z-index:5}
+  .topbar .lf{font-size:21px; color:var(--gold-soft)}
+  .topbar .nm{font-size:16px; font-weight:700; letter-spacing:.02em}
+  .topbar .tag{margin-left:auto; font-size:12px; opacity:.9; background:rgba(255,255,255,.15); padding:3px 11px; border-radius:20px}
+  .wrap{max-width:640px; margin:0 auto; padding:18px 16px 60px}
+
+  .hero{background:linear-gradient(160deg,var(--navy),var(--navy-soft)); color:#fff; border-radius:20px; padding:22px 20px 24px; text-align:center; box-shadow:0 14px 34px rgba(44,55,107,.28)}
+  .hero .lbl{font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold-soft); opacity:.95}
+  .hero .nm{font-size:25px; font-weight:700; margin:6px 0 2px}
+  .hero .sub{font-size:14.5px; font-style:italic; color:#dfe4f3; margin:0 0 14px}
+  .cd{display:flex; justify-content:center; gap:9px; margin:6px 0 4px}
+  .cd .u{background:rgba(255,255,255,.12); border:1px solid rgba(232,205,124,.3); border-radius:13px; padding:9px 4px; min-width:62px}
+  .cd .n{font-size:27px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums}
+  .cd .l{font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold-soft); margin-top:5px}
+  .hero .when{font-size:14px; color:#eef1fa; margin-top:12px}
+  .hero .when b{color:var(--gold-soft)}
+  .hero.today .nm{color:var(--gold-soft)}
+
+  .btns{display:flex; flex-wrap:wrap; gap:11px; margin:18px 0 4px}
+  .btn{flex:1 1 46%; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none;
+    font-family:inherit; font-size:15.5px; font-weight:700; padding:14px 12px; border-radius:14px; cursor:pointer; border:none; text-align:center}
+  .btn.primary{background:var(--navy); color:#fff; box-shadow:0 8px 20px rgba(44,55,107,.26)}
+  .btn.gold{background:var(--gold); color:#33270a}
+  .btn.ghost{background:var(--panel); color:var(--navy); border:1px solid var(--rule)}
+  .btn:active{transform:translateY(1px)}
+
+  .sec{margin:26px 0 0}
+  .sec h2{color:var(--navy); font-size:17px; margin:0 0 12px; display:flex; align-items:center; gap:8px}
+  .sec h2 .ic{color:var(--gold)}
+
+  .row{display:flex; align-items:flex-start; gap:13px; background:var(--panel); border:1px solid var(--rule); border-radius:14px; padding:13px 15px; margin-bottom:10px}
+  .row .d{flex:0 0 50px; text-align:center}
+  .row .d .day{font-size:21px; font-weight:700; color:var(--navy); line-height:1}
+  .row .d .mon{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--gold); font-weight:700}
+  .row .m .nm{font-size:16px; font-weight:700; color:var(--ink)}
+  .row .m .gl{font-size:13.5px; color:var(--muted); font-style:italic; margin-top:1px}
+  .row .m .pr{font-size:12.5px; color:var(--navy-soft); margin-top:5px}
+  .row .m .pr b{color:var(--gold)}
+  .row.next{border-color:var(--gold); box-shadow:0 4px 14px rgba(194,146,46,.16)}
+
+  .card{background:var(--panel); border:1px solid var(--rule); border-radius:16px; padding:16px 17px}
+  .card p{margin:.1em 0 13px; font-size:15px; color:var(--ink)}
+  .card .opt{display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink); padding:11px 6px; border-top:1px solid var(--rule)}
+  .card .opt .ico{font-size:21px; width:28px; text-align:center; flex:0 0 28px}
+  .card .opt .tx{flex:1}
+  .card .opt .tx .t{font-weight:700; color:var(--navy); font-size:15px}
+  .card .opt .tx .s{font-size:12.5px; color:var(--muted)}
+  .card .opt .ar{color:var(--gold); font-size:18px}
+
+  form.join{margin-top:4px}
+  form.join input{width:100%; font-family:inherit; font-size:16px; padding:12px 13px; border:1px solid var(--rule); border-radius:11px; background:#fff; color:var(--ink); margin-bottom:9px}
+  form.join input:focus{outline:none; border-color:var(--gold)}
+  form.join .send{width:100%; background:var(--gold); color:#33270a; border:none; font-family:inherit; font-size:16px; font-weight:700; padding:13px; border-radius:12px; cursor:pointer}
+  form.join .msg{font-size:13.5px; text-align:center; min-height:1.1em; margin-top:9px; color:var(--navy)}
+
+  .foot{margin:30px auto 0; text-align:center; color:var(--muted); font-size:13px; line-height:1.6; border-top:1px solid var(--rule); padding-top:18px}
+  .foot a{color:var(--navy-soft)}
+  @media (max-width:430px){ .btn{flex:1 1 100%} .hero .nm{font-size:22px} .cd .u{min-width:56px} }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="lf">&#9790;</span>
+    <span class="nm">One Fast</span>
+    <span class="tag">Companion</span>
+  </div>
+
+  <div class="wrap">
+    <div class="hero" id="hero">
+      <div class="lbl" id="heroLbl">Next Ekadashi</div>
+      <div class="nm" id="heroNm">—</div>
+      <div class="sub" id="heroSub"></div>
+      <div class="cd" id="cd">
+        <div class="u"><div class="n" id="cdD">0</div><div class="l">days</div></div>
+        <div class="u"><div class="n" id="cdH">0</div><div class="l">hrs</div></div>
+        <div class="u"><div class="n" id="cdM">0</div><div class="l">min</div></div>
+        <div class="u"><div class="n" id="cdS">0</div><div class="l">sec</div></div>
+      </div>
+      <div class="when" id="heroWhen"></div>
+    </div>
+
+    <div class="btns">
+      <a class="btn primary" href="read.html">&#128214; Read or listen, free</a>
+      <button class="btn gold" id="calBtn">&#128197; Add to my calendar</button>
+    </div>
+
+    <div class="sec">
+      <h2><span class="ic">&#9790;</span> Upcoming fast days</h2>
+      <div id="list"></div>
+    </div>
+
+    <div class="sec">
+      <h2><span class="ic">&#129760;</span> Become an Ekadashi Sevak</h2>
+      <div class="card">
+        <p>Leave your name for gentle reminders of the coming fast days, and simple ways to take part. No cost, no spam — only seva.</p>
+        <form class="join" id="joinForm">
+          <input id="jn" type="text" autocomplete="name" placeholder="Your name">
+          <input id="je" type="email" autocomplete="email" placeholder="you@example.com" required>
+          <button class="send" type="submit" id="sendBtn">Keep me posted</button>
+          <div class="msg" id="joinMsg"></div>
+        </form>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h2><span class="ic">&#128276;</span> Never miss a day</h2>
+      <div class="card">
+        <a class="opt" href="https://bhaktacharansevak-max.github.io/ekadashi-app/" target="_blank" rel="noopener">
+          <span class="ico">&#128197;</span>
+          <span class="tx"><div class="t">Full calendar &amp; your exact break-fast time</div><div class="s">The companion calendar app — every date, localized to your city</div></span>
+          <span class="ar">&#8594;</span>
+        </a>
+        <a class="opt" href="https://www.youtube.com/@EkadashiFasting" target="_blank" rel="noopener">
+          <span class="ico">&#9654;</span>
+          <span class="tx"><div class="t">Subscribe — Ekadashi Fasting</div><div class="s">Reminders, stories, and gentle music for each fast day</div></span>
+          <span class="ar">&#8594;</span>
+        </a>
+        <a class="opt" href="https://justonefast.com" target="_blank" rel="noopener">
+          <span class="ico">&#127881;</span>
+          <span class="tx"><div class="t">The Five Great Services</div><div class="s">One leaf, one name, one fast — explore the Pancha Maha Seva</div></span>
+          <span class="ar">&#8594;</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="foot">
+      <b>One Fast Can Change Your Life</b><br>
+      The eleventh-day fast, freely given. Part of the Pancha Maha Seva.<br>
+      <a href="read.html">Read or hear the book</a> &middot; <a href="https://justonefast.com">justonefast.com</a>
+    </div>
+  </div>
+
+<script>
+/* ---- verified Ekadashi data (ISKCON / Drik Panchang, 2026; same source as the calendar app) ---- */
+var EKADASHI = [
+  {date:"2026-06-25", name:"Pandava Nirjala Ekadashi", gl:"The one waterless fast — Bhima's fast"},
+  {date:"2026-07-11", name:"Yogini Ekadashi",          gl:"Frees from sins, grants liberation"},
+  {date:"2026-07-25", name:"Sayana Ekadashi",          gl:"Lord Vishnu's rest begins — Chaturmasya starts"},
+  {date:"2026-08-09", name:"Kamika Ekadashi",          gl:"Fulfils desires, washes away sins"},
+  {date:"2026-08-24", name:"Pavitropana Ekadashi",     gl:"The purifying fast"},
+  {date:"2026-09-07", name:"Annada Ekadashi",          gl:"Removes the gravest sins"},
+  {date:"2026-09-22", name:"Parsva Ekadashi",          gl:"The Lord turns in His sleep"},
+  {date:"2026-10-06", name:"Indira Ekadashi",          gl:"Offered for the upliftment of ancestors"},
+  {date:"2026-10-22", name:"Pashankusha Ekadashi",     gl:"The 'goad' that drives away sin"},
+  {date:"2026-11-05", name:"Rama Ekadashi",            gl:"Bestows great spiritual merit"},
+  {date:"2026-11-21", name:"Utthana Ekadashi",         gl:"Lord Vishnu awakens — Chaturmasya ends"},
+  {date:"2026-12-04", name:"Utpanna Ekadashi",         gl:"The appearance of Ekadashi Devi"},
+  {date:"2026-12-20", name:"Mokshada Ekadashi",        gl:"Gita Jayanti — bestows liberation"}
+];
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwou749sCStHL5ASKbdY2w_8iFVqLMlwnRzbETVEN_BQJ8OosAA6sUBy0-la73bCyCU4w/exec";
+var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var WD  = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+function ymdLocal(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function parseDate(s){ var p=s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }      // local midnight
+function nextMorning(s){ var d=parseDate(s); d.setDate(d.getDate()+1); return d; }
+function fmt(d){ return d.getDate()+' '+MON[d.getMonth()]; }
+function fmtLong(d){ return WD[d.getDay()]+', '+d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear(); }
+
+function upcoming(){
+  var today = ymdLocal(new Date()).getTime();
+  return EKADASHI.filter(function(e){ return parseDate(e.date).getTime() >= today; });
+}
+
+/* ---------- hero countdown ---------- */
+var up = upcoming();
+function renderHero(){
+  var list = upcoming();
+  var hero = document.getElementById('hero');
+  if(!list.length){
+    document.getElementById('heroLbl').textContent = 'Fast days';
+    document.getElementById('heroNm').textContent = 'New dates coming soon';
+    document.getElementById('heroSub').textContent = 'The dates for the coming months are being prepared.';
+    document.getElementById('cd').style.display = 'none';
+    document.getElementById('heroWhen').innerHTML = 'Get the <a style="color:var(--gold-soft)" href="https://bhaktacharansevak-max.github.io/ekadashi-app/">full calendar app</a> and subscribe to the channel.';
+    return null;
+  }
+  var nx = list[0];
+  var fast = parseDate(nx.date);
+  var todayY = ymdLocal(new Date()).getTime();
+  var isToday = fast.getTime() === todayY;
+  document.getElementById('heroNm').textContent = nx.name;
+  document.getElementById('heroSub').textContent = nx.gl;
+  if(isToday){
+    hero.classList.add('today');
+    document.getElementById('heroLbl').textContent = 'Today is the fast';
+    document.getElementById('cd').style.display = 'none';
+    document.getElementById('heroWhen').innerHTML = 'Keep the day, and break it tomorrow morning — <b>'+fmt(nextMorning(nx.date))+'</b>, after sunrise.';
+  } else {
+    document.getElementById('heroLbl').textContent = 'Next Ekadashi';
+    document.getElementById('heroWhen').innerHTML = 'Fast on <b>'+fmtLong(fast)+'</b><br>Break it the next morning, '+fmt(nextMorning(nx.date))+', after sunrise.';
+  }
+  return fast;
+}
+var target = renderHero();
+function tick(){
+  if(!target) return;
+  var now = new Date().getTime();
+  var diff = Math.max(0, target.getTime() - now);
+  var s = Math.floor(diff/1000);
+  document.getElementById('cdD').textContent = Math.floor(s/86400);
+  document.getElementById('cdH').textContent = Math.floor((s%86400)/3600);
+  document.getElementById('cdM').textContent = Math.floor((s%3600)/60);
+  document.getElementById('cdS').textContent = s%60;
+  if(diff===0){ target = renderHero(); }     // rolled over to the fast day
+}
+tick(); setInterval(tick, 1000);
+
+/* ---------- upcoming list ---------- */
+(function(){
+  var html = '';
+  var list = upcoming().slice(0, 12);
+  list.forEach(function(e, i){
+    var d = parseDate(e.date);
+    html += '<div class="row'+(i===0?' next':'')+'">'+
+      '<div class="d"><div class="day">'+d.getDate()+'</div><div class="mon">'+MON[d.getMonth()]+'</div></div>'+
+      '<div class="m"><div class="nm">'+e.name+'</div><div class="gl">'+e.gl+'</div>'+
+      '<div class="pr">Break fast <b>'+fmt(nextMorning(e.date))+'</b>, the next morning</div></div></div>';
+  });
+  document.getElementById('list').innerHTML = html || '<div class="row"><div class="m"><div class="nm">New dates coming soon</div></div></div>';
+})();
+
+/* ---------- calendar (.ics) export — real offline reminders, every device ---------- */
+function pad(n){ return (n<10?'0':'')+n; }
+function icsDate(d){ return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate()); }
+document.getElementById('calBtn').addEventListener('click', function(){
+  var lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//One Fast//Ekadashi//EN','CALSCALE:GREGORIAN'];
+  upcoming().forEach(function(e){
+    var d = parseDate(e.date), end = nextMorning(e.date);
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:'+e.date+'-onefast@justonefast.com');
+    lines.push('DTSTART;VALUE=DATE:'+icsDate(d));
+    lines.push('DTEND;VALUE=DATE:'+icsDate(end));
+    lines.push('SUMMARY:'+e.name+' — fast day');
+    lines.push('DESCRIPTION:'+e.gl+'. Keep one day for God. Break the fast the next morning after sunrise. justonefast.com');
+    lines.push('TRANSP:TRANSPARENT');
+    lines.push('BEGIN:VALARM','TRIGGER:-PT6H','ACTION:DISPLAY','DESCRIPTION:'+e.name+' fast begins tomorrow — prepare a light meal this evening','END:VALARM');
+    lines.push('END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  var blob = new Blob([lines.join('\r\n')], {type:'text/calendar'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href = url; a.download = 'ekadashi-fast-days.ics';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+  var b = document.getElementById('calBtn'); var old = b.innerHTML;
+  b.innerHTML = '&#10003; Added — open the file to confirm';
+  setTimeout(function(){ b.innerHTML = old; }, 4000);
+});
+
+/* ---------- Sevak sign-up (same sheet as the website) ---------- */
+document.getElementById('joinForm').addEventListener('submit', function(ev){
+  ev.preventDefault();
+  var name=document.getElementById('jn').value.trim();
+  var email=document.getElementById('je').value.trim();
+  var msg=document.getElementById('joinMsg'), btn=document.getElementById('sendBtn');
+  if(!email || email.indexOf('@')<1){ msg.textContent='Please enter a valid email.'; return; }
+  btn.disabled=true; msg.textContent='Sending…';
+  fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({name:name, email:email, source:'onefast-app'})})
+    .then(function(r){ return r.json(); }).then(done).catch(done);
+  function done(){
+    document.getElementById('joinForm').innerHTML =
+      '<div class="msg" style="font-size:15px">&#128591; Thank you. We will be in touch gently, with fast-day reminders.</div>';
+  }
+});
+</script>
+</body>
+</html>
