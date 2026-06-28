@@ -117,6 +117,8 @@
         <input id="jn" type="text" autocomplete="name" placeholder="Name">
         <label for="je">Your email</label>
         <input id="je" type="email" autocomplete="email" placeholder="you@example.com" required>
+        <label for="jm">Your mobile <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <input id="jm" type="tel" autocomplete="tel" placeholder="Mobile number">
         <button class="send" id="sendBtn" type="submit">Keep me posted</button>
         <div class="msg" id="formMsg"></div>
         <div class="privacy">We'll only write to share fast-day reminders and seva — never sold or shared.</div>
@@ -143,11 +145,12 @@ document.getElementById('joinForm').addEventListener('submit', function(e){
   e.preventDefault();
   var name=document.getElementById('jn').value.trim();
   var email=document.getElementById('je').value.trim();
+  var mobile=document.getElementById('jm').value.trim();
   if(!email || email.indexOf('@')<1){ msg('Please enter a valid email.', 'err'); return; }
   if(!SCRIPT_URL){ msg("We're just finishing setup — please check back very soon.", 'ok'); return; }
   sendBtn.disabled=true; msg('Sending…');
   fetch(SCRIPT_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify({name:name, email:email, source:'onefast-home'})})
+    body: JSON.stringify({name:name, email:email, mobile:mobile, source:'onefast-home'})})
    .then(function(r){ return r.json(); })
    .then(function(){ thanks(); })
    .catch(function(){ thanks(); });
